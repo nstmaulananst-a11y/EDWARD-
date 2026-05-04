@@ -1,9 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edward.EXE | Ultimate System</title>
+    <meta name="description" content="Edward EXE Ultimate System - Tool Gacor 2026">
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; position: fixed; top: 0; left: 0; z-index: -1; }
@@ -15,27 +17,24 @@
         button { background: transparent; color: #00ff00; border: 2px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8em; transition: 0.3s; }
         button:hover { background: #00ff00; color: black; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; box-sizing: border-box; color: #00ff00; overflow-y: auto; }
-        .radar-window { width: 100%; height: 80%; border: 2px solid #00ff00; border-radius: 10px; overflow: hidden; background: #000; }
-        #radar-frame { filter: invert(1) hue-rotate(90deg) brightness(0.8); border: none; width: 100%; height: 100%; }
-        .log-box { height: 150px; overflow: hidden; font-size: 0.8em; margin-top: 20px; text-align: left; border-left: 2px solid #00ff00; padding-left: 10px; }
         .bar-container { width: 100%; border: 1px solid #00ff00; height: 15px; margin-top: 15px; }
         .bar-fill { width: 0%; height: 100%; background: #00ff00; box-shadow: 0 0 10px #00ff00; }
         .exit-btn { width: 100%; height: 45px; background: #ff0000; color: white; border: none; margin-top: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; }
-        #cursor { display: inline-block; width: 10px; height: 1.2em; background: #00ff00; margin-left: 5px; animation: blink 0.8s infinite; }
-        @keyframes blink { 0% {opacity:0} 50% {opacity:1} 100% {opacity:0} }
+        #radar-frame { filter: invert(1) hue-rotate(90deg); border: none; width: 100%; height: 80%; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
+
     <div id="login-screen">
         <div class="login-box">
             <h3>[ SYSTEM LOCKED ]</h3>
             <input type="text" id="passkey" placeholder="ACCESS KEY..." onkeypress="if(event.key==='Enter') checkPass()">
             <br><br>
             <button onclick="checkPass()" style="width: 100%;">AUTHORIZE</button>
-            <p id="error-msg" style="color: red; font-size: 0.7em; margin-top: 10px;"></p>
         </div>
     </div>
+
     <div id="main-content">
         <h2>> EDWARD.EXE</h2>
         <div class="game-menu">
@@ -43,54 +42,77 @@
             <button onclick="window.location.href='minecraft://'">MINECRAFT</button>
             <button onclick="window.location.href='roblox://'">ROBLOX</button>
             <button onclick="openRadar()">RADAR CUACA</button>
-            <button onclick="openTerminal()">TERMINAL EXPLOIT</button>
+            <button onclick="openTerminal()">TERMINAL</button>
             <button onclick="startScan()">SCAN SYSTEM</button>
-            <button onclick="checkDevice()" style="grid-column: span 2; background: rgba(0,255,0,0.1);">CHECK DEVICE SENSOR</button>
-            <button onclick="location.reload()" style="grid-column: span 2;">LOGOUT SYSTEM</button>
+            <button onclick="trackGPS()" style="grid-column: span 2; background: rgba(0,255,0,0.1); border-color: yellow; color: yellow;">📍 LACAK LOKASI TARGET</button>
+            <button onclick="location.reload()" style="grid-column: span 2;">LOGOUT</button>
         </div>
     </div>
-    <div id="radar-overlay" class="overlay">
-        <div class="radar-window"><iframe id="radar-frame"></iframe></div>
-        <button class="exit-btn" onclick="closeOverlay('radar-overlay')">CLOSE RADAR</button>
-    </div>
-    <div id="terminal-overlay" class="overlay" onclick="focusInput()">
-        <div id="terminal-content"><span id="terminal-text">READY...</span><span id="cursor"></span></div>
-        <input type="text" id="hidden-input" style="position: absolute; opacity: 0;" oninput="handleTyping()">
-        <button class="exit-btn" onclick="closeOverlay('terminal-overlay')">EXIT TERMINAL</button>
-    </div>
-    <div id="scan-overlay" class="overlay">
-        <h3>[ SCANNING... ]</h3>
-        <div id="scan-logs" class="log-box"></div>
-        <div class="bar-container"><div id="scan-bar" class="bar-fill"></div></div>
-        <p id="scan-pct">0%</p>
-        <button id="scan-close-btn" class="exit-btn" onclick="closeOverlay('scan-overlay')" style="display:none;">FINISH</button>
-    </div>
-    <div id="device-overlay" class="overlay">
-        <h3>[ DEVICE SENSOR ]</h3>
-        <div class="bar-container"><div id="device-bar" class="bar-fill"></div></div>
-        <div id="device-result" style="display:none; margin-top: 20px;">
-            <p>📱 OS: <span id="dev-os">...</span></p>
-            <p>🔋 BATTERY: <span id="bat-level">...</span></p>
+
+    <div id="gps-overlay" class="overlay">
+        <h3>[ GPS INTERCEPTOR ]</h3>
+        <div id="gps-logs" style="font-size: 0.8em; text-align: left; height: 100px; overflow: hidden;"></div>
+        <div class="bar-container"><div id="gps-bar" class="bar-fill"></div></div>
+        <div id="gps-result" style="display:none; margin-top: 20px; text-align: left; border: 1px solid #00ff00; padding: 10px;">
+            <p>🛰️ STATUS: SIGNAL LOCKED</p>
+            <p>📍 LAT: <span id="lat">...</span></p>
+            <p>📍 LON: <span id="lon">...</span></p>
+            <button id="maps-btn" onclick="" style="width: 100%; color: yellow; border-color: yellow;">LIHAT DI GOOGLE MAPS</button>
         </div>
-        <button class="exit-btn" onclick="closeOverlay('device-overlay')">CLOSE</button>
+        <button class="exit-btn" onclick="closeOverlay('gps-overlay')">CLOSE</button>
     </div>
+
+    <div id="radar-overlay" class="overlay"><iframe id="radar-frame"></iframe><button class="exit-btn" onclick="closeOverlay('radar-overlay')">CLOSE</button></div>
+    <div id="scan-overlay" class="overlay"><h3>SCANNING...</h3><div class="bar-container"><div id="scan-bar" class="bar-fill"></div></div><button class="exit-btn" onclick="closeOverlay('scan-overlay')">FINISH</button></div>
+
     <script>
+        // MATRIX & LOGIN (Sama seperti sebelumnya)
         const canvas = document.getElementById('matrix'); const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const letters = "01"; const fontSize = 16; const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
         function draw() { ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#0f0"; ctx.font = fontSize + "px arial"; drops.forEach((y, i) => { const text = letters.charAt(Math.floor(Math.random() * letters.length)); ctx.fillText(text, i * fontSize, y * fontSize); if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; }); }
         setInterval(draw, 33);
-
         function checkPass() { if (document.getElementById("passkey").value.toUpperCase().trim() === "EDWARD-HECKER") { document.getElementById("login-screen").style.display = "none"; document.getElementById("main-content").style.display = "block"; } }
+
+        // GPS TRACKING LOGIC
+        function trackGPS() {
+            const overlay = document.getElementById("gps-overlay");
+            const logs = document.getElementById("gps-logs");
+            const bar = document.getElementById("gps-bar");
+            overlay.style.display = "block";
+            logs.innerHTML = "> Meminta akses satelit...<br>";
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    let w = 0;
+                    const intv = setInterval(() => {
+                        w += 5; bar.style.width = w + "%";
+                        if(w === 40) logs.innerHTML += "> Mengenkripsi sinyal GPS...<br>";
+                        if(w === 80) logs.innerHTML += "> Menentukan titik koordinat...<br>";
+                        if (w >= 100) {
+                            clearInterval(intv);
+                            document.getElementById("gps-result").style.display = "block";
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            document.getElementById("lat").innerHTML = lat;
+                            document.getElementById("lon").innerHTML = lon;
+                            document.getElementById("maps-btn").onclick = () => {
+                                window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
+                            };
+                        }
+                    }, 50);
+                }, () => {
+                    logs.innerHTML += "<span style='color:red'>> ERROR: AKSES DITOLAK TARGET!</span>";
+                });
+            } else {
+                alert("Browser tidak mendukung GPS.");
+            }
+        }
+
         function openRadar() { document.getElementById("radar-frame").src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1"; document.getElementById("radar-overlay").style.display = "block"; }
-        function openTerminal() { document.getElementById("terminal-overlay").style.display = "block"; setTimeout(() => document.getElementById("hidden-input").focus(), 500); }
-        function startScan() { document.getElementById("scan-overlay").style.display = "block"; let w = 0; const bar = document.getElementById("scan-bar"); const intv = setInterval(() => { if (w >= 100) { clearInterval(intv); document.getElementById("scan-close-btn").style.display = "block"; } else { w++; bar.style.width = w + "%"; document.getElementById("scan-pct").innerHTML = w + "%"; } }, 30); }
-        function checkDevice() { document.getElementById("device-overlay").style.display = "block"; let w = 0; const bar = document.getElementById("device-bar"); const intv = setInterval(() => { if (w >= 100) { clearInterval(intv); document.getElementById("device-result").style.display = "block"; document.getElementById("dev-os").innerHTML = navigator.platform; if(navigator.getBattery) navigator.getBattery().then(b => document.getElementById("bat-level").innerHTML = Math.round(b.level * 100) + "%"); } else { w += 2; bar.style.width = w + "%"; } }, 30); }
         function closeOverlay(id) { document.getElementById(id).style.display = "none"; }
-        const fakeCode = `\n> INJECTING... \n> ACCESS GRANTED \n`; let tIdx = 0;
-        function handleTyping() { document.getElementById("terminal-text").innerHTML += fakeCode.slice(tIdx, tIdx + 5); tIdx = (tIdx + 5) % fakeCode.length; }
-        function focusInput() { document.getElementById("hidden-input").focus(); }
+        function startScan() { document.getElementById("scan-overlay").style.display = "block"; let w = 0; const bar = document.getElementById("scan-bar"); const intv = setInterval(() => { if (w >= 100) clearInterval(intv); else { w++; bar.style.width = w + "%"; } }, 30); }
     </script>
 </body>
 </html>
