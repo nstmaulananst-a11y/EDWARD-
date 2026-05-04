@@ -3,62 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edward.EXE | Ultimate System</title>
+    <title>Edward.EXE | Ultimate</title>
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
-        canvas { display: block; }
+        canvas { display: block; position: fixed; top: 0; left: 0; z-index: -1; }
         
-        /* LOGIN SECTION */
-        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #00ff00; }
-        .login-box { border: 2px solid #00ff00; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 0 20px #00ff00; background: black; }
-        input { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; text-align: center; margin-top: 15px; outline: none; width: 180px; }
-
         /* MENU UTAMA */
-        .content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9); padding: 20px; border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00; border-radius: 10px; z-index: 1; width: 85%; max-width: 400px; display: none; }
+        .content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9); padding: 20px; border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00; border-radius: 10px; width: 85%; max-width: 400px; z-index: 10; }
         .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        button { background: transparent; color: #00ff00; border: 1px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; font-size: 0.75em; transition: 0.3s; text-transform: uppercase; }
-        button:hover { background: #00ff00; color: black; box-shadow: 0 0 10px #00ff00; }
+        button { background: transparent; color: #00ff00; border: 1px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
 
-        /* RADAR & TERMINAL */
-        #radar-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; height: 60%; border: 2px solid #00ff00; z-index: 50; background: black; border-radius: 10px; overflow: hidden; }
-        #terminal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.98); z-index: 300; padding: 20px; box-sizing: border-box; overflow-y: auto; color: #00ff00; font-size: 0.9em; white-space: pre-wrap; word-break: break-all; text-align: left; }
+        /* TERMINAL HECKER SOLID */
+        #terminal-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: black; z-index: 999; padding: 20px; box-sizing: border-box; 
+            overflow-y: auto; color: #00ff00; font-size: 1em; white-space: pre-wrap; 
+        }
+        #exit-btn { position: fixed; top: 10px; right: 10px; background: red; color: white; border: none; padding: 8px; font-weight: bold; z-index: 1000; }
         
-        .scan-line { color: yellow; font-size: 0.7em; height: 20px; margin: 10px 0; font-weight: bold; }
+        /* INPUT RAHASIA BIAR KEYBOARD MUNCUL */
+        #hidden-input { position: absolute; opacity: 0; bottom: 0; left: 0; width: 1px; height: 1px; }
     </style>
 </head>
 <body>
 
     <canvas id="matrix"></canvas>
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h3 style="margin:0;">[ SYSTEM LOCKED ]</h3>
-            <input type="text" id="passkey" placeholder="ACCESS KEY..." onkeypress="if(event.key==='Enter') checkPass()">
-            <br><br>
-            <button onclick="checkPass()" style="width: 100%;">AUTHORIZE</button>
-            <p id="error-msg" style="color: red; font-size: 0.6em; margin-top: 10px;"></p>
-        </div>
-    </div>
-
     <div class="content" id="main-content">
-        <h2 id="typewriter"></h2>
-        <div id="scan-status" class="scan-line">SYSTEM READY...</div>
+        <h2>> EDWARD.EXE</h2>
         <div class="game-menu">
-            <button onclick="launch('intent:#Intent;package=com.dts.freefireth;end')">FREE FIRE</button>
-            <button onclick="launch('minecraft://')">MINECRAFT</button>
-            <button id="radar-btn" onclick="toggleRadar()">RADAR ACTIVATE</button>
             <button onclick="openTerminal()">TERMINAL EXPLOIT</button>
-            <button onclick="startScan()">SCAN SYSTEM</button>
             <button onclick="location.reload()">LOGOUT</button>
         </div>
     </div>
 
-    <div id="radar-container"><iframe id="radar-frame" width="100%" height="100%" frameborder="0"></iframe></div>
-
-    <div id="terminal-overlay" onclick="handleTyping()">
-        <div id="terminal-text"></div>
-        <button onclick="event.stopPropagation(); closeTerminal();" style="position: fixed; bottom: 20px; right: 20px; background: red; color: white; border: none; padding: 10px 20px; font-weight: bold; z-index: 301;">EXIT</button>
-        <div style="position: fixed; top: 10px; left: 10px; color: rgba(0,255,0,0.5); font-size: 0.6em;">TAP SCREEN TO INJECT CODE...</div>
+    <div id="terminal-overlay" onclick="focusInput()">
+        <button id="exit-btn" onclick="closeTerminal()">EXIT</button>
+        <div id="terminal-text">READY... TYPE ANYTHING!</div>
+        <input type="text" id="hidden-input" autocomplete="off" oninput="handleTyping()">
     </div>
 
     <script>
@@ -80,69 +62,41 @@
         }
         setInterval(draw, 33);
 
-        // LOGIN SYSTEM
-        function checkPass() {
-            const pass = document.getElementById("passkey").value.toUpperCase().trim();
-            if (pass === "EDWARD-HECKER") {
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("main-content").style.display = "block";
-                typeWriter();
-            } else {
-                document.getElementById("error-msg").innerHTML = "INVALID ACCESS KEY!";
-                setTimeout(() => { document.getElementById("error-msg").innerHTML = ""; }, 2000);
-            }
-        }
-
-        const textTitle = "> EDWARD.EXE"; let ti = 0;
-        function typeWriter() {
-            if (ti < textTitle.length) {
-                document.getElementById("typewriter").innerHTML += textTitle.charAt(ti);
-                ti++; setTimeout(typeWriter, 100);
-            }
-        }
-
-        // RADAR SYSTEM
-        function toggleRadar() {
-            const rc = document.getElementById("radar-container"), rf = document.getElementById("radar-frame"), rb = document.getElementById("radar-btn");
-            if (rc.style.display === "none" || rc.style.display === "") {
-                rf.src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1";
-                rc.style.display = "block"; rb.innerHTML = "RADAR OFF"; rb.style.color = "red";
-            } else {
-                rc.style.display = "none"; rf.src = ""; rb.innerHTML = "RADAR ACTIVATE"; rb.style.color = "#00ff00";
-            }
-        }
-
-        // TERMINAL EXPLOIT SYSTEM (AUTO-SCROLL & TAP SUPPORT)
-        const fakeCode = `\n> INITIALIZING... \n> BYPASSING FIREWALL... \n> ACCESSING SATELLITE... \n> [OK] ENCRYPTION KEY FOUND \n> DECRYPTING DATA... \n> git clone https://nasa.gov/secret_core \n> rm -rf /security/logs \n> ssh root@192.168.0.1 \n> STATUS: ACCESS GRANTED! \n> EXPLOIT SUCCESSFUL... \n> INJECTING MALWARE... \n> [####################] 100% \n> DATABASE COPIED. \n`;
+        const fakeCode = `\n> CONNECTING TO SERVER... \n> BYPASSING SSL... [OK] \n> INJECTING SQL... \n> FETCHING ADMIN_HASH... \n> CRACKING PASSWORD... \n> [SUCCESS] ACCESS GRANTED! \n> git push origin main --force \n> EXPLOIT COMPLETED. \n`;
         let termIdx = 0;
+
         function openTerminal() {
             document.getElementById("terminal-overlay").style.display = "block";
-            document.getElementById("terminal-text").innerHTML = "START TAPPING TO EXPLOIT...<br>";
-            window.addEventListener("keydown", handleTyping);
+            focusInput();
+        }
+
+        function focusInput() {
+            const input = document.getElementById("hidden-input");
+            input.focus(); // Paksa keyboard muncul
         }
 
         function handleTyping() {
             const term = document.getElementById("terminal-text");
             const overlay = document.getElementById("terminal-overlay");
-            // Sekali sentuh muncul 6 karakter biar cepet
-            term.innerHTML += fakeCode.slice(termIdx, termIdx + 6);
-            termIdx += 6;
+            const input = document.getElementById("hidden-input");
+
+            // Kosongkan input rahasia biar bisa diketik terus
+            input.value = "";
+
+            // Munculkan kode palsu
+            term.innerHTML += fakeCode.slice(termIdx, termIdx + 5);
+            termIdx += 5;
             if (termIdx >= fakeCode.length) termIdx = 0;
-            // Paksa scroll ke bawah otomatis
+
+            // Getar & Scroll
+            if (navigator.vibrate) navigator.vibrate(15);
             overlay.scrollTop = overlay.scrollHeight;
         }
 
         function closeTerminal() {
             document.getElementById("terminal-overlay").style.display = "none";
-            document.getElementById("terminal-text").innerHTML = "";
+            document.getElementById("terminal-text").innerHTML = "READY... TYPE ANYTHING!";
             termIdx = 0;
-            window.removeEventListener("keydown", handleTyping);
-        }
-
-        function launch(url) { window.location.href = url; }
-        function startScan() {
-            let s = document.getElementById("scan-status"); s.innerHTML = "SCANNING VULNERABILITIES...";
-            setTimeout(() => { s.innerHTML = "SYSTEM SECURE."; }, 1500);
         }
     </script>
 </body>
