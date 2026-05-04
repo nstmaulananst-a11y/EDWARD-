@@ -3,49 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edward.EXE | Secure Access</title>
+    <title>Edward.EXE | Ultimate System</title>
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; }
+        
+        /* LOGIN SECTION */
         #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #00ff00; }
         .login-box { border: 2px solid #00ff00; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 0 20px #00ff00; background: black; }
         input { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; text-align: center; margin-top: 15px; outline: none; width: 180px; }
+
+        /* MENU UTAMA */
         .content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9); padding: 20px; border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00; border-radius: 10px; z-index: 1; width: 85%; max-width: 400px; display: none; }
         .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         button { background: transparent; color: #00ff00; border: 1px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; font-size: 0.75em; transition: 0.3s; text-transform: uppercase; }
         button:hover { background: #00ff00; color: black; box-shadow: 0 0 10px #00ff00; }
-        #radar-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; height: 60%; border: 2px solid #00ff00; box-shadow: 0 0 30px #00ff00; z-index: 50; background: black; border-radius: 10px; overflow: hidden; }
+
+        /* RADAR & TERMINAL */
+        #radar-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; height: 60%; border: 2px solid #00ff00; z-index: 50; background: black; border-radius: 10px; overflow: hidden; }
+        #terminal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 300; padding: 20px; box-sizing: border-box; overflow-y: auto; color: #00ff00; font-size: 1em; white-space: pre-wrap; word-break: break-all; text-align: left; }
+        
         .scan-line { color: yellow; font-size: 0.7em; height: 20px; margin: 10px 0; font-weight: bold; }
+        .exit-hint { position: fixed; bottom: 20px; right: 20px; color: red; font-size: 0.7em; z-index: 301; pointer-events: none; }
     </style>
 </head>
 <body>
+
     <canvas id="matrix"></canvas>
+
     <div id="login-screen">
         <div class="login-box">
             <h3 style="margin:0;">[ SYSTEM LOCKED ]</h3>
-            <p style="font-size: 0.7em;">ENTER ACCESS KEY</p>
-            <input type="text" id="passkey" placeholder="Ketik di sini..." onkeypress="if(event.key==='Enter') checkPass()">
+            <input type="text" id="passkey" placeholder="ACCESS KEY..." onkeypress="if(event.key==='Enter') checkPass()">
             <br><br>
             <button onclick="checkPass()" style="width: 100%;">AUTHORIZE</button>
             <p id="error-msg" style="color: red; font-size: 0.6em; margin-top: 10px;"></p>
         </div>
     </div>
+
     <div class="content" id="main-content">
         <h2 id="typewriter"></h2>
         <div id="scan-status" class="scan-line">SYSTEM READY...</div>
         <div class="game-menu">
             <button onclick="launch('intent:#Intent;package=com.dts.freefireth;end')">FREE FIRE</button>
             <button onclick="launch('minecraft://')">MINECRAFT</button>
-            <button onclick="launch('intent:#Intent;package=id.dana;end')">DANA</button>
             <button id="radar-btn" onclick="toggleRadar()">RADAR ACTIVATE</button>
+            <button onclick="openTerminal()">TERMINAL EXPLOIT</button>
             <button onclick="startScan()">SCAN SYSTEM</button>
             <button onclick="location.reload()">LOGOUT</button>
         </div>
         <p id="msg" style="color: cyan; font-size: 0.7em; margin-top: 10px;"></p>
     </div>
+
     <div id="radar-container"><iframe id="radar-frame" width="100%" height="100%" frameborder="0"></iframe></div>
 
+    <div id="terminal-overlay" onclick="closeTerminal()">
+        <div id="terminal-text"></div>
+        <div class="exit-hint">[ TAP ANYWHERE TO EXIT ]</div>
+    </div>
+
     <script>
+        // MATRIX
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -63,6 +81,7 @@
         }
         setInterval(draw, 33);
 
+        // LOGIN
         function checkPass() {
             const pass = document.getElementById("passkey").value.toUpperCase().trim();
             if (pass === "EDWARD-HECKER") {
@@ -70,41 +89,62 @@
                 document.getElementById("main-content").style.display = "block";
                 typeWriter();
             } else {
-                document.getElementById("error-msg").innerHTML = "INVALID KEY!";
+                document.getElementById("error-msg").innerHTML = "INVALID ACCESS KEY!";
                 setTimeout(() => { document.getElementById("error-msg").innerHTML = ""; }, 2000);
             }
         }
 
-        const text = "> EDWARD.EXE"; let i = 0;
+        const textTitle = "> EDWARD.EXE"; let ti = 0;
         function typeWriter() {
-            if (i < text.length) {
-                document.getElementById("typewriter").innerHTML += text.charAt(i);
-                i++; setTimeout(typeWriter, 100);
+            if (ti < textTitle.length) {
+                document.getElementById("typewriter").innerHTML += textTitle.charAt(ti);
+                ti++; setTimeout(typeWriter, 100);
             }
         }
 
+        // RADAR
         function toggleRadar() {
-            const radarContainer = document.getElementById("radar-container");
-            const radarFrame = document.getElementById("radar-frame");
-            const btn = document.getElementById("radar-btn");
-            if (radarContainer.style.display === "none" || radarContainer.style.display === "") {
-                radarFrame.src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1";
-                radarContainer.style.display = "block";
-                btn.innerHTML = "RADAR OFF";
-                btn.style.borderColor = "#ff0000"; btn.style.color = "#ff0000";
+            const rc = document.getElementById("radar-container"), rf = document.getElementById("radar-frame"), rb = document.getElementById("radar-btn");
+            if (rc.style.display === "none" || rc.style.display === "") {
+                rf.src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1";
+                rc.style.display = "block"; rb.innerHTML = "RADAR OFF"; rb.style.color = "red";
             } else {
-                radarContainer.style.display = "none";
-                radarFrame.src = "";
-                btn.innerHTML = "RADAR ACTIVATE";
-                btn.style.borderColor = "#00ff00"; btn.style.color = "#00ff00";
+                rc.style.display = "none"; rf.src = ""; rb.innerHTML = "RADAR ACTIVATE"; rb.style.color = "#00ff00";
             }
+        }
+
+        // TERMINAL EXPLOIT
+        const fakeCode = `\n> INITIALIZING... \n> BYPASSING FIREWALL... \n> ACCESSING SATELLITE... \n> [OK] ENCRYPTION KEY FOUND \n> DECRYPTING DATA... \n> git clone https://nasa.gov/secret_core \n> rm -rf /security/logs \n> ssh root@192.168.0.1 \n> STATUS: ACCESS GRANTED! \n> EXPLOIT SUCCESSFUL... \n`;
+        let termIdx = 0;
+        function openTerminal() {
+            document.getElementById("terminal-overlay").style.display = "block";
+            document.getElementById("terminal-text").innerHTML = "START TYPING TO EXPLOIT...<br>";
+            window.addEventListener("keydown", handleTyping);
+            // Support untuk Mobile: Tap layar juga nambahin teks
+            document.getElementById("terminal-overlay").addEventListener("click", handleTyping);
+        }
+        function handleTyping() {
+            const term = document.getElementById("terminal-text");
+            term.innerHTML += fakeCode.slice(termIdx, termIdx + 4);
+            termIdx += 4;
+            if (termIdx >= fakeCode.length) termIdx = 0;
+            const overlay = document.getElementById("terminal-overlay");
+            overlay.scrollTop = overlay.scrollHeight;
+        }
+        function closeTerminal(e) {
+            // Biar ga bentrok sama klik ngetik di mobile
+            setTimeout(() => {
+                document.getElementById("terminal-overlay").style.display = "none";
+                document.getElementById("terminal-text").innerHTML = "";
+                termIdx = 0;
+                window.removeEventListener("keydown", handleTyping);
+            }, 100);
         }
 
         function launch(url) { window.location.href = url; }
         function startScan() {
-            let status = document.getElementById("scan-status");
-            status.innerHTML = "SCANNING..."; status.style.color = "red";
-            setTimeout(() => { status.innerHTML = "SYSTEM SECURE."; status.style.color = "yellow"; }, 1500);
+            let s = document.getElementById("scan-status"); s.innerHTML = "SCANNING VULNERABILITIES...";
+            setTimeout(() => { s.innerHTML = "SYSTEM SECURE."; }, 1500);
         }
     </script>
 </body>
