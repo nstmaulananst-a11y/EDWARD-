@@ -3,48 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edward.EXE | Ultimate</title>
+    <title>Edward.EXE | Ultimate System</title>
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; position: fixed; top: 0; left: 0; z-index: -1; }
         
-        /* MENU UTAMA */
-        .content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9); padding: 20px; border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00; border-radius: 10px; width: 85%; max-width: 400px; z-index: 10; }
-        .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        button { background: transparent; color: #00ff00; border: 1px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        /* LOGIN SCREEN */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #00ff00; }
+        .login-box { border: 2px solid #00ff00; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 0 20px #00ff00; background: black; }
+        input#passkey { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; text-align: center; margin-top: 15px; outline: none; width: 200px; }
 
-        /* TERMINAL HECKER SOLID */
-        #terminal-overlay { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: black; z-index: 999; padding: 20px; box-sizing: border-box; 
-            overflow-y: auto; color: #00ff00; font-size: 1em; white-space: pre-wrap; 
-        }
-        #exit-btn { position: fixed; top: 10px; right: 10px; background: red; color: white; border: none; padding: 8px; font-weight: bold; z-index: 1000; }
-        
-        /* INPUT RAHASIA BIAR KEYBOARD MUNCUL */
-        #hidden-input { position: absolute; opacity: 0; bottom: 0; left: 0; width: 1px; height: 1px; }
+        /* MENU UTAMA NEON GACOR */
+        .content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.95); padding: 25px; border: 3px solid #00ff00; box-shadow: 0 0 25px #00ff00; border-radius: 15px; width: 85%; max-width: 400px; z-index: 10; display: none; }
+        .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        button { background: transparent; color: #00ff00; border: 2px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8em; transition: 0.3s; }
+        button:hover { background: #00ff00; color: black; box-shadow: 0 0 15px #00ff00; }
+
+        /* TERMINAL HECKER PRO NEON */
+        #terminal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; color: #00ff00; font-size: 1.1em; white-space: pre-wrap; text-shadow: 0 0 5px #00ff00; }
+        #cursor { display: inline-block; width: 10px; height: 1.2em; background: #00ff00; margin-left: 5px; animation: blink 0.8s infinite; vertical-align: middle; }
+        @keyframes blink { 0% {opacity:0} 50% {opacity:1} 100% {opacity:0} }
+        #exit-btn { position: fixed; top: 15px; right: 15px; background: #ff0000; color: white; border: none; padding: 10px 15px; font-weight: bold; z-index: 2100; border-radius: 5px; box-shadow: 0 0 10px red; }
+        #hidden-input { position: absolute; opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
 
     <canvas id="matrix"></canvas>
 
+    <div id="login-screen">
+        <div class="login-box">
+            <h3>[ SYSTEM LOCKED ]</h3>
+            <input type="text" id="passkey" placeholder="ACCESS KEY..." onkeypress="if(event.key==='Enter') checkPass()">
+            <br><br>
+            <button onclick="checkPass()" style="width: 100%;">AUTHORIZE</button>
+            <p id="error-msg" style="color: red; font-size: 0.7em; margin-top: 10px;"></p>
+        </div>
+    </div>
+
     <div class="content" id="main-content">
-        <h2>> EDWARD.EXE</h2>
+        <h2 id="title-text">> EDWARD.EXE</h2>
         <div class="game-menu">
+            <button onclick="window.location.href='intent:#Intent;package=com.dts.freefireth;end'">FREE FIRE</button>
+            <button onclick="window.location.href='minecraft://'">MINECRAFT</button>
+            <button onclick="window.open('https://www.rainviewer.com/map.html?loc=-2,118,5&type=1', '_blank')">RADAR CUACA</button>
             <button onclick="openTerminal()">TERMINAL EXPLOIT</button>
+            <button onclick="startScan()">SCAN SYSTEM</button>
             <button onclick="location.reload()">LOGOUT</button>
         </div>
     </div>
 
     <div id="terminal-overlay" onclick="focusInput()">
-        <button id="exit-btn" onclick="closeTerminal()">EXIT</button>
-        <div id="terminal-text">READY... TYPE ANYTHING!</div>
+        <button id="exit-btn" onclick="event.stopPropagation(); closeTerminal();">EXIT</button>
+        <div id="terminal-content">
+            <span id="terminal-text">READY... TYPE ANYTHING!</span>
+            <span id="cursor"></span>
+        </div>
         <input type="text" id="hidden-input" autocomplete="off" oninput="handleTyping()">
     </div>
 
     <script>
-        // MATRIX BACKGROUND
+        // MATRIX EFFECT
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -62,34 +81,38 @@
         }
         setInterval(draw, 33);
 
-        const fakeCode = `\n> CONNECTING TO SERVER... \n> BYPASSING SSL... [OK] \n> INJECTING SQL... \n> FETCHING ADMIN_HASH... \n> CRACKING PASSWORD... \n> [SUCCESS] ACCESS GRANTED! \n> git push origin main --force \n> EXPLOIT COMPLETED. \n`;
+        // LOGIN
+        function checkPass() {
+            const pass = document.getElementById("passkey").value.toUpperCase().trim();
+            if (pass === "EDWARD-HECKER") {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("main-content").style.display = "block";
+            } else {
+                document.getElementById("error-msg").innerHTML = "INVALID KEY!";
+                setTimeout(() => { document.getElementById("error-msg").innerHTML = ""; }, 2000);
+            }
+        }
+
+        // TERMINAL LOGIC
+        const fakeCode = `\n> INITIALIZING SYSTEM... \n> BYPASSING FIREWALL... [DONE] \n> ACCESSING ENCRYPTED DATA... \n> INJECTING MALWARE PAYLOAD... \n> [####################] 100% \n> ROOT ACCESS GRANTED! \n> DOWNLOADING DATABASE... \n> CLEANING LOG FILES... \n> EXPLOIT SUCCESSFUL. \n`;
         let termIdx = 0;
 
         function openTerminal() {
             document.getElementById("terminal-overlay").style.display = "block";
-            focusInput();
+            document.getElementById("terminal-text").innerHTML = "SYSTEM READY... INJECT CODE NOW!\n";
+            setTimeout(focusInput, 500);
         }
 
-        function focusInput() {
-            const input = document.getElementById("hidden-input");
-            input.focus(); // Paksa keyboard muncul
-        }
+        function focusInput() { document.getElementById("hidden-input").focus(); }
 
         function handleTyping() {
             const term = document.getElementById("terminal-text");
             const overlay = document.getElementById("terminal-overlay");
-            const input = document.getElementById("hidden-input");
-
-            // Kosongkan input rahasia biar bisa diketik terus
-            input.value = "";
-
-            // Munculkan kode palsu
-            term.innerHTML += fakeCode.slice(termIdx, termIdx + 5);
-            termIdx += 5;
+            document.getElementById("hidden-input").value = "";
+            term.innerHTML += fakeCode.slice(termIdx, termIdx + 6);
+            termIdx += 6;
             if (termIdx >= fakeCode.length) termIdx = 0;
-
-            // Getar & Scroll
-            if (navigator.vibrate) navigator.vibrate(15);
+            if (navigator.vibrate) navigator.vibrate(20);
             overlay.scrollTop = overlay.scrollHeight;
         }
 
@@ -97,6 +120,10 @@
             document.getElementById("terminal-overlay").style.display = "none";
             document.getElementById("terminal-text").innerHTML = "READY... TYPE ANYTHING!";
             termIdx = 0;
+        }
+
+        function startScan() {
+            alert("SCANNING SYSTEM VULNERABILITIES...");
         }
     </script>
 </body>
