@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edward Hacker Launcher</title>
+    <title>Edward.EXE System</title>
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; }
@@ -16,11 +16,11 @@
         .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         button {
             background: transparent; color: #00ff00; border: 1px solid #00ff00;
-            padding: 10px; font-weight: bold; cursor: pointer; font-size: 0.8em;
+            padding: 12px 5px; font-weight: bold; cursor: pointer; font-size: 0.75em;
             transition: 0.3s; text-transform: uppercase;
         }
         button:hover { background: #00ff00; color: black; box-shadow: 0 0 10px #00ff00; }
-        .scan-line { color: yellow; font-size: 0.7em; height: 20px; margin: 10px 0; }
+        .scan-line { color: yellow; font-size: 0.7em; height: 20px; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -31,22 +31,23 @@
         <h2 id="typewriter"></h2>
         <div id="scan-status" class="scan-line">SYSTEM READY...</div>
         
-        <p style="font-size: 0.9em;">[ SELECT PROTOCOL ]</p>
+        <p style="font-size: 0.8em; color: #00ff00;">[ SELECT PROTOCOL ]</p>
         <div class="game-menu">
             <button onclick="launch('minecraft://')">MINECRAFT</button>
             <button onclick="launch('roblox://')">ROBLOX</button>
-            <button onclick="launch('https://link.freefire.garena.tw')">FREE FIRE</button>
+            <button onclick="launch('intent:#Intent;package=com.dts.freefireth;end')">FREE FIRE</button>
+            <button onclick="launch('intent:#Intent;package=id.dana;end')">DANA</button>
             <button onclick="startScan()">SCAN SYSTEM</button>
+            <button onclick="location.reload()">REFRESH</button>
         </div>
-        <p id="msg" style="color: red; font-size: 0.7em; margin-top: 10px;"></p>
+        <p id="msg" style="color: cyan; font-size: 0.7em; margin-top: 10px;"></p>
     </div>
 
     <script>
-        // Matrix Background
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "01";
+        const letters = "010101";
         const fontSize = 16; const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
 
@@ -63,8 +64,8 @@
         }
         setInterval(draw, 33);
 
-        // Typewriter
-        const text = "> EDWARD_EXECUTOR";
+        // BAGIAN YANG DIGANTI
+        const text = "> EDWARD.EXE";
         let i = 0;
         function typeWriter() {
             if (i < text.length) {
@@ -74,22 +75,22 @@
         }
         window.onload = typeWriter;
 
-        // Launcher Function
         function launch(url) {
-            document.getElementById("msg").innerHTML = "LAUNCHING PROTOCOL...";
+            document.getElementById("msg").innerHTML = "BYPASSING SECURITY...";
             setTimeout(() => {
                 window.location.href = url;
-            }, 500);
+                document.getElementById("msg").innerHTML = "EXECUTED.";
+            }, 800);
         }
 
         function startScan() {
             let status = document.getElementById("scan-status");
-            status.innerHTML = "SCANNING VULNERABILITIES...";
+            status.innerHTML = "SEARCHING FOR VULNERABILITIES...";
             status.style.color = "red";
             setTimeout(() => { 
-                status.innerHTML = "SYSTEM SECURE."; 
+                status.innerHTML = "DATABASE ENCRYPTED. SYSTEM SECURE."; 
                 status.style.color = "yellow";
-            }, 2000);
+            }, 2500);
         }
     </script>
 </body>
