@@ -14,21 +14,17 @@
         input#passkey { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; text-align: center; margin-top: 15px; outline: none; width: 200px; }
 
         /* MENU UTAMA */
-        .content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.95); padding: 25px; border: 3px solid #00ff00; box-shadow: 0 0 25px #00ff00; border-radius: 15px; width: 85%; max-width: 400px; z-index: 10; display: none; }
+        #main-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.95); padding: 25px; border: 3px solid #00ff00; box-shadow: 0 0 25px #00ff00; border-radius: 15px; width: 85%; max-width: 400px; z-index: 10; display: none; }
         .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         button { background: transparent; color: #00ff00; border: 2px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8em; transition: 0.3s; }
         button:hover { background: #00ff00; color: black; box-shadow: 0 0 15px #00ff00; }
 
         /* OVERLAYS */
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; box-sizing: border-box; color: #00ff00; overflow-y: auto; }
-        .radar-window { width: 100%; height: 80%; border: 2px solid #00ff00; border-radius: 10px; overflow: hidden; background: #000; }
-        #radar-frame { filter: invert(1) hue-rotate(90deg) brightness(0.8); border: none; width: 100%; height: 100%; }
-
         .log-box { height: 180px; overflow: hidden; font-size: 0.8em; margin-top: 20px; text-align: left; border-left: 2px solid #00ff00; padding-left: 10px; }
         .bar-container { width: 100%; border: 1px solid #00ff00; height: 15px; margin-top: 15px; }
         .bar-fill { width: 0%; height: 100%; background: #00ff00; box-shadow: 0 0 10px #00ff00; }
-
-        .exit-btn { width: 100%; height: 45px; background: #ff0000; color: white; border: none; margin-top: 15px; font-weight: bold; border-radius: 5px; box-shadow: 0 0 10px red; cursor: pointer; }
+        .exit-btn { width: 100%; height: 45px; background: #ff0000; color: white; border: none; margin-top: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; }
         #cursor { display: inline-block; width: 10px; height: 1.2em; background: #00ff00; margin-left: 5px; animation: blink 0.8s infinite; vertical-align: middle; }
         @keyframes blink { 0% {opacity:0} 50% {opacity:1} 100% {opacity:0} }
     </style>
@@ -43,10 +39,11 @@
             <input type="text" id="passkey" placeholder="ACCESS KEY..." onkeypress="if(event.key==='Enter') checkPass()">
             <br><br>
             <button onclick="checkPass()" style="width: 100%;">AUTHORIZE</button>
+            <p id="error-msg" style="color: red; font-size: 0.7em; margin-top: 10px;"></p>
         </div>
     </div>
 
-    <div id="main-content" class="content">
+    <div id="main-content">
         <h2>> EDWARD.EXE</h2>
         <div class="game-menu">
             <button onclick="window.location.href='intent:#Intent;package=com.dts.freefireth;end'">FREE FIRE</button>
@@ -66,32 +63,13 @@
         <div class="bar-container"><div id="device-bar" class="bar-fill"></div></div>
         <p id="device-pct">0%</p>
         <div id="device-result" style="display:none; text-align: left; background: rgba(0,255,0,0.1); padding: 15px; border: 1px solid #00ff00;">
-            <p>📱 MODEL: <span id="dev-os">Detecting...</span></p>
-            <p>🔋 BATTERY: <span id="bat-level">Detecting...</span></p>
-            <p>⚡ STATUS: <span id="bat-status">Detecting...</span></p>
-            <p>🌐 ONLINE: <span id="dev-net">Detecting...</span></p>
-            <p style="color: red; font-weight: bold;">🚀 TARGET STATUS: COMPROMISED</p>
+            <p>📱 OS: <span id="dev-os">...</span></p>
+            <p>🔋 BATTERY: <span id="bat-level">...</span></p>
+            <p>⚡ STATUS: <span id="bat-status">...</span></p>
+            <p>📡 ONLINE: <span id="dev-net">...</span></p>
+            <p style="color: red; font-weight: bold;">🚀 STATUS: COMPROMISED</p>
         </div>
         <button class="exit-btn" onclick="closeOverlay('device-overlay')">BACK TO HOME</button>
-    </div>
-
-    <div id="terminal-overlay" class="overlay" onclick="focusInput()">
-        <div id="terminal-content"><span id="terminal-text">READY...</span><span id="cursor"></span></div>
-        <input type="text" id="hidden-input" style="position: absolute; opacity: 0;" oninput="handleTyping()">
-        <button class="exit-btn" onclick="closeOverlay('terminal-overlay')">EXIT TERMINAL</button>
-    </div>
-
-    <div id="radar-overlay" class="overlay">
-        <div class="radar-window"><iframe id="radar-frame"></iframe></div>
-        <button class="exit-btn" onclick="closeRadar()">CLOSE RADAR</button>
-    </div>
-
-    <div id="scan-overlay" class="overlay">
-        <h3>[ SCANNING... ]</h3>
-        <div id="scan-logs" class="log-box"></div>
-        <div class="bar-container"><div id="scan-bar" class="bar-fill"></div></div>
-        <p id="scan-pct">0%</p>
-        <button id="scan-close-btn" class="exit-btn" onclick="closeOverlay('scan-overlay')" style="display:none;">FINISH</button>
     </div>
 
     <script>
@@ -113,24 +91,29 @@
         }
         setInterval(draw, 33);
 
-        function checkPass() { if (document.getElementById("passkey").value.toUpperCase().trim() === "EDWARD-HECKER") { document.getElementById("login-screen").style.display = "none"; document.getElementById("main-content").style.display = "block"; } }
+        // LOGIN FIX
+        function checkPass() {
+            const pass = document.getElementById("passkey").value.toUpperCase().trim();
+            if (pass === "EDWARD-HECKER") {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("main-content").style.display = "block";
+            } else {
+                document.getElementById("error-msg").innerHTML = "ACCESS DENIED!";
+                setTimeout(() => { document.getElementById("error-msg").innerHTML = ""; }, 2000);
+            }
+        }
 
-        // REAL DEVICE CHECK LOGIC
+        // DEVICE SENSOR LOGIC
         function checkDevice() {
             const overlay = document.getElementById("device-overlay");
-            const logs = document.getElementById("device-logs");
             const bar = document.getElementById("device-bar");
             const result = document.getElementById("device-result");
-            overlay.style.display = "block"; result.style.display = "none"; logs.innerHTML = "";
-            let w = 0; 
-            const steps = ["Accessing Sensors...", "Bypassing Device Security...", "Reading Battery Data...", "Targeting IP Address...", "Target Locked!"];
-            let sIdx = 0;
+            overlay.style.display = "block"; result.style.display = "none";
+            let w = 0;
             const intv = setInterval(() => {
                 if (w >= 100) {
                     clearInterval(intv); result.style.display = "block";
-                    // Mendeteksi Info HP Asli
                     document.getElementById("dev-os").innerHTML = navigator.platform;
-                    document.getElementById("dev-net").innerHTML = navigator.onLine ? "YES (ACTIVE)" : "NO";
                     if(navigator.getBattery) {
                         navigator.getBattery().then(b => {
                             document.getElementById("bat-level").innerHTML = Math.round(b.level * 100) + "%";
@@ -139,15 +122,12 @@
                     }
                 } else {
                     w += 2; bar.style.width = w + "%"; document.getElementById("device-pct").innerHTML = w + "%";
-                    if (w % 20 === 0 && sIdx < steps.length) {
-                        logs.innerHTML += "> " + steps[sIdx] + "<br>";
-                        sIdx++;
-                        if (navigator.vibrate) navigator.vibrate(15);
-                    }
                 }
             }, 40);
         }
 
-        // FUNGSI LAIN (RADAR, TERMINAL, SCAN)
-        function openRadar() { document.getElementById("radar-frame").src = "
+        function closeOverlay(id) { document.getElementById(id).style.display = "none"; }
+    </script>
+</body>
+</html>
 
