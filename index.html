@@ -21,10 +21,9 @@
 
         /* RADAR & TERMINAL */
         #radar-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; height: 60%; border: 2px solid #00ff00; z-index: 50; background: black; border-radius: 10px; overflow: hidden; }
-        #terminal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 300; padding: 20px; box-sizing: border-box; overflow-y: auto; color: #00ff00; font-size: 1em; white-space: pre-wrap; word-break: break-all; text-align: left; }
+        #terminal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.98); z-index: 300; padding: 20px; box-sizing: border-box; overflow-y: auto; color: #00ff00; font-size: 0.9em; white-space: pre-wrap; word-break: break-all; text-align: left; }
         
         .scan-line { color: yellow; font-size: 0.7em; height: 20px; margin: 10px 0; font-weight: bold; }
-        .exit-hint { position: fixed; bottom: 20px; right: 20px; color: red; font-size: 0.7em; z-index: 301; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -52,18 +51,18 @@
             <button onclick="startScan()">SCAN SYSTEM</button>
             <button onclick="location.reload()">LOGOUT</button>
         </div>
-        <p id="msg" style="color: cyan; font-size: 0.7em; margin-top: 10px;"></p>
     </div>
 
     <div id="radar-container"><iframe id="radar-frame" width="100%" height="100%" frameborder="0"></iframe></div>
 
-    <div id="terminal-overlay" onclick="closeTerminal()">
+    <div id="terminal-overlay" onclick="handleTyping()">
         <div id="terminal-text"></div>
-        <div class="exit-hint">[ TAP ANYWHERE TO EXIT ]</div>
+        <button onclick="event.stopPropagation(); closeTerminal();" style="position: fixed; bottom: 20px; right: 20px; background: red; color: white; border: none; padding: 10px 20px; font-weight: bold; z-index: 301;">EXIT</button>
+        <div style="position: fixed; top: 10px; left: 10px; color: rgba(0,255,0,0.5); font-size: 0.6em;">TAP SCREEN TO INJECT CODE...</div>
     </div>
 
     <script>
-        // MATRIX
+        // MATRIX BACKGROUND
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -81,7 +80,7 @@
         }
         setInterval(draw, 33);
 
-        // LOGIN
+        // LOGIN SYSTEM
         function checkPass() {
             const pass = document.getElementById("passkey").value.toUpperCase().trim();
             if (pass === "EDWARD-HECKER") {
@@ -102,7 +101,7 @@
             }
         }
 
-        // RADAR
+        // RADAR SYSTEM
         function toggleRadar() {
             const rc = document.getElementById("radar-container"), rf = document.getElementById("radar-frame"), rb = document.getElementById("radar-btn");
             if (rc.style.display === "none" || rc.style.display === "") {
@@ -113,32 +112,31 @@
             }
         }
 
-        // TERMINAL EXPLOIT
-        const fakeCode = `\n> INITIALIZING... \n> BYPASSING FIREWALL... \n> ACCESSING SATELLITE... \n> [OK] ENCRYPTION KEY FOUND \n> DECRYPTING DATA... \n> git clone https://nasa.gov/secret_core \n> rm -rf /security/logs \n> ssh root@192.168.0.1 \n> STATUS: ACCESS GRANTED! \n> EXPLOIT SUCCESSFUL... \n`;
+        // TERMINAL EXPLOIT SYSTEM (AUTO-SCROLL & TAP SUPPORT)
+        const fakeCode = `\n> INITIALIZING... \n> BYPASSING FIREWALL... \n> ACCESSING SATELLITE... \n> [OK] ENCRYPTION KEY FOUND \n> DECRYPTING DATA... \n> git clone https://nasa.gov/secret_core \n> rm -rf /security/logs \n> ssh root@192.168.0.1 \n> STATUS: ACCESS GRANTED! \n> EXPLOIT SUCCESSFUL... \n> INJECTING MALWARE... \n> [####################] 100% \n> DATABASE COPIED. \n`;
         let termIdx = 0;
         function openTerminal() {
             document.getElementById("terminal-overlay").style.display = "block";
-            document.getElementById("terminal-text").innerHTML = "START TYPING TO EXPLOIT...<br>";
+            document.getElementById("terminal-text").innerHTML = "START TAPPING TO EXPLOIT...<br>";
             window.addEventListener("keydown", handleTyping);
-            // Support untuk Mobile: Tap layar juga nambahin teks
-            document.getElementById("terminal-overlay").addEventListener("click", handleTyping);
         }
+
         function handleTyping() {
             const term = document.getElementById("terminal-text");
-            term.innerHTML += fakeCode.slice(termIdx, termIdx + 4);
-            termIdx += 4;
-            if (termIdx >= fakeCode.length) termIdx = 0;
             const overlay = document.getElementById("terminal-overlay");
+            // Sekali sentuh muncul 6 karakter biar cepet
+            term.innerHTML += fakeCode.slice(termIdx, termIdx + 6);
+            termIdx += 6;
+            if (termIdx >= fakeCode.length) termIdx = 0;
+            // Paksa scroll ke bawah otomatis
             overlay.scrollTop = overlay.scrollHeight;
         }
-        function closeTerminal(e) {
-            // Biar ga bentrok sama klik ngetik di mobile
-            setTimeout(() => {
-                document.getElementById("terminal-overlay").style.display = "none";
-                document.getElementById("terminal-text").innerHTML = "";
-                termIdx = 0;
-                window.removeEventListener("keydown", handleTyping);
-            }, 100);
+
+        function closeTerminal() {
+            document.getElementById("terminal-overlay").style.display = "none";
+            document.getElementById("terminal-text").innerHTML = "";
+            termIdx = 0;
+            window.removeEventListener("keydown", handleTyping);
         }
 
         function launch(url) { window.location.href = url; }
