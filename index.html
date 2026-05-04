@@ -7,69 +7,32 @@
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; }
-        
-        /* LAYAR LOGIN */
-        #login-screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.95); z-index: 100;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: #00ff00;
-        }
-        .login-box {
-            border: 2px solid #00ff00; padding: 30px; border-radius: 10px;
-            text-align: center; box-shadow: 0 0 20px #00ff00; background: black;
-        }
-        input {
-            background: transparent; border: 1px solid #00ff00; color: #00ff00;
-            padding: 10px; text-align: center; margin-top: 15px; outline: none; width: 180px;
-        }
-
-        /* MENU UTAMA */
-        .content {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9);
-            padding: 20px; border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00;
-            border-radius: 10px; z-index: 1; width: 85%; max-width: 400px;
-            display: none;
-        }
+        #login-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #00ff00; }
+        .login-box { border: 2px solid #00ff00; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 0 20px #00ff00; background: black; }
+        input { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; text-align: center; margin-top: 15px; outline: none; width: 180px; }
+        .content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.9); padding: 20px; border: 2px solid #00ff00; box-shadow: 0 0 20px #00ff00; border-radius: 10px; z-index: 1; width: 85%; max-width: 400px; display: none; }
         .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
-        button {
-            background: transparent; color: #00ff00; border: 1px solid #00ff00;
-            padding: 12px 5px; font-weight: bold; cursor: pointer; font-size: 0.75em;
-            transition: 0.3s; text-transform: uppercase;
-        }
+        button { background: transparent; color: #00ff00; border: 1px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; font-size: 0.75em; transition: 0.3s; text-transform: uppercase; }
         button:hover { background: #00ff00; color: black; box-shadow: 0 0 10px #00ff00; }
-
-        /* RADAR POPUP */
-        #radar-container {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); width: 95%; height: 60%;
-            border: 2px solid #00ff00; box-shadow: 0 0 30px #00ff00;
-            z-index: 50; background: black; border-radius: 10px; overflow: hidden;
-        }
-        
+        #radar-container { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; height: 60%; border: 2px solid #00ff00; box-shadow: 0 0 30px #00ff00; z-index: 50; background: black; border-radius: 10px; overflow: hidden; }
         .scan-line { color: yellow; font-size: 0.7em; height: 20px; margin: 10px 0; font-weight: bold; }
     </style>
 </head>
 <body>
-
     <canvas id="matrix"></canvas>
-
     <div id="login-screen">
         <div class="login-box">
             <h3 style="margin:0;">[ SYSTEM LOCKED ]</h3>
             <p style="font-size: 0.7em;">ENTER ACCESS KEY</p>
-            <input type="text" id="passkey" placeholder="Ketik di sini...">
+            <input type="text" id="passkey" placeholder="Ketik di sini..." onkeypress="if(event.key==='Enter') checkPass()">
             <br><br>
             <button onclick="checkPass()" style="width: 100%;">AUTHORIZE</button>
             <p id="error-msg" style="color: red; font-size: 0.6em; margin-top: 10px;"></p>
         </div>
     </div>
-
     <div class="content" id="main-content">
         <h2 id="typewriter"></h2>
         <div id="scan-status" class="scan-line">SYSTEM READY...</div>
-        
         <div class="game-menu">
             <button onclick="launch('intent:#Intent;package=com.dts.freefireth;end')">FREE FIRE</button>
             <button onclick="launch('minecraft://')">MINECRAFT</button>
@@ -80,27 +43,72 @@
         </div>
         <p id="msg" style="color: cyan; font-size: 0.7em; margin-top: 10px;"></p>
     </div>
-
-    <div id="radar-container">
-        <iframe id="radar-frame" width="100%" height="100%" frameborder="0"></iframe>
-    </div>
+    <div id="radar-container"><iframe id="radar-frame" width="100%" height="100%" frameborder="0"></iframe></div>
 
     <script>
-        // MATRIX EFFECT
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-        const letters = "01";
-        const fontSize = 16; const columns = canvas.width / fontSize;
+        const letters = "01"; const fontSize = 16; const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
-
         function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "#0f0"; ctx.font = fontSize + "px arial";
             drops.forEach((y, i) => {
                 const text = letters.charAt(Math.floor(Math.random() * letters.length));
-                ctx.fillText(
+                ctx.fillText(text, i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(draw, 33);
+
+        function checkPass() {
+            const pass = document.getElementById("passkey").value.toUpperCase().trim();
+            if (pass === "EDWARD-HECKER") {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("main-content").style.display = "block";
+                typeWriter();
+            } else {
+                document.getElementById("error-msg").innerHTML = "INVALID KEY!";
+                setTimeout(() => { document.getElementById("error-msg").innerHTML = ""; }, 2000);
+            }
+        }
+
+        const text = "> EDWARD.EXE"; let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                document.getElementById("typewriter").innerHTML += text.charAt(i);
+                i++; setTimeout(typeWriter, 100);
+            }
+        }
+
+        function toggleRadar() {
+            const radarContainer = document.getElementById("radar-container");
+            const radarFrame = document.getElementById("radar-frame");
+            const btn = document.getElementById("radar-btn");
+            if (radarContainer.style.display === "none" || radarContainer.style.display === "") {
+                radarFrame.src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1";
+                radarContainer.style.display = "block";
+                btn.innerHTML = "RADAR OFF";
+                btn.style.borderColor = "#ff0000"; btn.style.color = "#ff0000";
+            } else {
+                radarContainer.style.display = "none";
+                radarFrame.src = "";
+                btn.innerHTML = "RADAR ACTIVATE";
+                btn.style.borderColor = "#00ff00"; btn.style.color = "#00ff00";
+            }
+        }
+
+        function launch(url) { window.location.href = url; }
+        function startScan() {
+            let status = document.getElementById("scan-status");
+            status.innerHTML = "SCANNING..."; status.style.color = "red";
+            setTimeout(() => { status.innerHTML = "SYSTEM SECURE."; status.style.color = "yellow"; }, 1500);
+        }
+    </script>
+</body>
+</html>
 
 
 
