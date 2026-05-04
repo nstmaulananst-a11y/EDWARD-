@@ -7,32 +7,26 @@
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; position: fixed; top: 0; left: 0; z-index: -1; }
-        
-        /* LOGIN SCREEN */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 3000; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #00ff00; }
         .login-box { border: 2px solid #00ff00; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 0 20px #00ff00; background: black; }
         input#passkey { background: transparent; border: 1px solid #00ff00; color: #00ff00; padding: 10px; text-align: center; margin-top: 15px; outline: none; width: 200px; }
-
-        /* MENU UTAMA */
         #main-content { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; text-align: center; background: rgba(0, 0, 0, 0.95); padding: 25px; border: 3px solid #00ff00; box-shadow: 0 0 25px #00ff00; border-radius: 15px; width: 85%; max-width: 400px; z-index: 10; display: none; }
         .game-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
         button { background: transparent; color: #00ff00; border: 2px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8em; transition: 0.3s; }
-        button:hover { background: #00ff00; color: black; box-shadow: 0 0 15px #00ff00; }
-
-        /* OVERLAYS */
+        button:hover { background: #00ff00; color: black; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; box-sizing: border-box; color: #00ff00; overflow-y: auto; }
-        .log-box { height: 180px; overflow: hidden; font-size: 0.8em; margin-top: 20px; text-align: left; border-left: 2px solid #00ff00; padding-left: 10px; }
+        .radar-window { width: 100%; height: 80%; border: 2px solid #00ff00; border-radius: 10px; overflow: hidden; background: #000; }
+        #radar-frame { filter: invert(1) hue-rotate(90deg) brightness(0.8); border: none; width: 100%; height: 100%; }
+        .log-box { height: 150px; overflow: hidden; font-size: 0.8em; margin-top: 20px; text-align: left; border-left: 2px solid #00ff00; padding-left: 10px; }
         .bar-container { width: 100%; border: 1px solid #00ff00; height: 15px; margin-top: 15px; }
         .bar-fill { width: 0%; height: 100%; background: #00ff00; box-shadow: 0 0 10px #00ff00; }
         .exit-btn { width: 100%; height: 45px; background: #ff0000; color: white; border: none; margin-top: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; }
-        #cursor { display: inline-block; width: 10px; height: 1.2em; background: #00ff00; margin-left: 5px; animation: blink 0.8s infinite; vertical-align: middle; }
+        #cursor { display: inline-block; width: 10px; height: 1.2em; background: #00ff00; margin-left: 5px; animation: blink 0.8s infinite; }
         @keyframes blink { 0% {opacity:0} 50% {opacity:1} 100% {opacity:0} }
     </style>
 </head>
 <body>
-
     <canvas id="matrix"></canvas>
-
     <div id="login-screen">
         <div class="login-box">
             <h3>[ SYSTEM LOCKED ]</h3>
@@ -42,7 +36,6 @@
             <p id="error-msg" style="color: red; font-size: 0.7em; margin-top: 10px;"></p>
         </div>
     </div>
-
     <div id="main-content">
         <h2>> EDWARD.EXE</h2>
         <div class="game-menu">
@@ -56,77 +49,48 @@
             <button onclick="location.reload()" style="grid-column: span 2;">LOGOUT SYSTEM</button>
         </div>
     </div>
-
+    <div id="radar-overlay" class="overlay">
+        <div class="radar-window"><iframe id="radar-frame"></iframe></div>
+        <button class="exit-btn" onclick="closeOverlay('radar-overlay')">CLOSE RADAR</button>
+    </div>
+    <div id="terminal-overlay" class="overlay" onclick="focusInput()">
+        <div id="terminal-content"><span id="terminal-text">READY...</span><span id="cursor"></span></div>
+        <input type="text" id="hidden-input" style="position: absolute; opacity: 0;" oninput="handleTyping()">
+        <button class="exit-btn" onclick="closeOverlay('terminal-overlay')">EXIT TERMINAL</button>
+    </div>
+    <div id="scan-overlay" class="overlay">
+        <h3>[ SCANNING... ]</h3>
+        <div id="scan-logs" class="log-box"></div>
+        <div class="bar-container"><div id="scan-bar" class="bar-fill"></div></div>
+        <p id="scan-pct">0%</p>
+        <button id="scan-close-btn" class="exit-btn" onclick="closeOverlay('scan-overlay')" style="display:none;">FINISH</button>
+    </div>
     <div id="device-overlay" class="overlay">
-        <h3>[ INJECTING DEVICE SENSOR ]</h3>
-        <div id="device-logs" class="log-box"></div>
+        <h3>[ DEVICE SENSOR ]</h3>
         <div class="bar-container"><div id="device-bar" class="bar-fill"></div></div>
-        <p id="device-pct">0%</p>
-        <div id="device-result" style="display:none; text-align: left; background: rgba(0,255,0,0.1); padding: 15px; border: 1px solid #00ff00;">
+        <div id="device-result" style="display:none; margin-top: 20px;">
             <p>📱 OS: <span id="dev-os">...</span></p>
             <p>🔋 BATTERY: <span id="bat-level">...</span></p>
-            <p>⚡ STATUS: <span id="bat-status">...</span></p>
-            <p>📡 ONLINE: <span id="dev-net">...</span></p>
-            <p style="color: red; font-weight: bold;">🚀 STATUS: COMPROMISED</p>
         </div>
-        <button class="exit-btn" onclick="closeOverlay('device-overlay')">BACK TO HOME</button>
+        <button class="exit-btn" onclick="closeOverlay('device-overlay')">CLOSE</button>
     </div>
-
     <script>
-        // MATRIX BG
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
+        const canvas = document.getElementById('matrix'); const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const letters = "01"; const fontSize = 16; const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
-        function draw() {
-            ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#0f0"; ctx.font = fontSize + "px arial";
-            drops.forEach((y, i) => {
-                const text = letters.charAt(Math.floor(Math.random() * letters.length));
-                ctx.fillText(text, i * fontSize, y * fontSize);
-                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
-            });
-        }
+        function draw() { ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#0f0"; ctx.font = fontSize + "px arial"; drops.forEach((y, i) => { const text = letters.charAt(Math.floor(Math.random() * letters.length)); ctx.fillText(text, i * fontSize, y * fontSize); if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; }); }
         setInterval(draw, 33);
 
-        // LOGIN FIX
-        function checkPass() {
-            const pass = document.getElementById("passkey").value.toUpperCase().trim();
-            if (pass === "EDWARD-HECKER") {
-                document.getElementById("login-screen").style.display = "none";
-                document.getElementById("main-content").style.display = "block";
-            } else {
-                document.getElementById("error-msg").innerHTML = "ACCESS DENIED!";
-                setTimeout(() => { document.getElementById("error-msg").innerHTML = ""; }, 2000);
-            }
-        }
-
-        // DEVICE SENSOR LOGIC
-        function checkDevice() {
-            const overlay = document.getElementById("device-overlay");
-            const bar = document.getElementById("device-bar");
-            const result = document.getElementById("device-result");
-            overlay.style.display = "block"; result.style.display = "none";
-            let w = 0;
-            const intv = setInterval(() => {
-                if (w >= 100) {
-                    clearInterval(intv); result.style.display = "block";
-                    document.getElementById("dev-os").innerHTML = navigator.platform;
-                    if(navigator.getBattery) {
-                        navigator.getBattery().then(b => {
-                            document.getElementById("bat-level").innerHTML = Math.round(b.level * 100) + "%";
-                            document.getElementById("bat-status").innerHTML = b.charging ? "CHARGING" : "DISCHARGING";
-                        });
-                    }
-                } else {
-                    w += 2; bar.style.width = w + "%"; document.getElementById("device-pct").innerHTML = w + "%";
-                }
-            }, 40);
-        }
-
+        function checkPass() { if (document.getElementById("passkey").value.toUpperCase().trim() === "EDWARD-HECKER") { document.getElementById("login-screen").style.display = "none"; document.getElementById("main-content").style.display = "block"; } }
+        function openRadar() { document.getElementById("radar-frame").src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1"; document.getElementById("radar-overlay").style.display = "block"; }
+        function openTerminal() { document.getElementById("terminal-overlay").style.display = "block"; setTimeout(() => document.getElementById("hidden-input").focus(), 500); }
+        function startScan() { document.getElementById("scan-overlay").style.display = "block"; let w = 0; const bar = document.getElementById("scan-bar"); const intv = setInterval(() => { if (w >= 100) { clearInterval(intv); document.getElementById("scan-close-btn").style.display = "block"; } else { w++; bar.style.width = w + "%"; document.getElementById("scan-pct").innerHTML = w + "%"; } }, 30); }
+        function checkDevice() { document.getElementById("device-overlay").style.display = "block"; let w = 0; const bar = document.getElementById("device-bar"); const intv = setInterval(() => { if (w >= 100) { clearInterval(intv); document.getElementById("device-result").style.display = "block"; document.getElementById("dev-os").innerHTML = navigator.platform; if(navigator.getBattery) navigator.getBattery().then(b => document.getElementById("bat-level").innerHTML = Math.round(b.level * 100) + "%"); } else { w += 2; bar.style.width = w + "%"; } }, 30); }
         function closeOverlay(id) { document.getElementById(id).style.display = "none"; }
+        const fakeCode = `\n> INJECTING... \n> ACCESS GRANTED \n`; let tIdx = 0;
+        function handleTyping() { document.getElementById("terminal-text").innerHTML += fakeCode.slice(tIdx, tIdx + 5); tIdx = (tIdx + 5) % fakeCode.length; }
+        function focusInput() { document.getElementById("hidden-input").focus(); }
     </script>
 </body>
 </html>
