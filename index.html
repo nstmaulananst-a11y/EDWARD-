@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edward.EXE | Ultimate System</title>
-    <meta name="description" content="Edward EXE Ultimate System - Tool Gacor 2026">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; background: black; overflow: hidden; font-family: 'Courier New', Courier, monospace; }
         canvas { display: block; position: fixed; top: 0; left: 0; z-index: -1; }
@@ -17,15 +16,16 @@
         button { background: transparent; color: #00ff00; border: 2px solid #00ff00; padding: 12px 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8em; transition: 0.3s; }
         button:hover { background: #00ff00; color: black; }
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; padding: 20px; box-sizing: border-box; color: #00ff00; overflow-y: auto; }
+        #map { width: 100%; height: 300px; border: 2px solid #00ff00; margin-top: 10px; display: none; border-radius: 10px; }
         .bar-container { width: 100%; border: 1px solid #00ff00; height: 15px; margin-top: 15px; }
-        .bar-fill { width: 0%; height: 100%; background: #00ff00; box-shadow: 0 0 10px #00ff00; }
-        .exit-btn { width: 100%; height: 45px; background: #ff0000; color: white; border: none; margin-top: 15px; font-weight: bold; border-radius: 5px; cursor: pointer; }
-        #radar-frame { filter: invert(1) hue-rotate(90deg); border: none; width: 100%; height: 80%; }
+        .bar-fill { width: 0%; height: 100%; background: #00ff00; }
+        .exit-btn { width: 100%; height: 45px; background: #ff0000; color: white; border: none; margin-top: 15px; font-weight: bold; cursor: pointer; }
+        #cursor { display: inline-block; width: 10px; height: 1.2em; background: #00ff00; margin-left: 5px; animation: blink 0.8s infinite; }
+        @keyframes blink { 0% {opacity:0} 50% {opacity:1} 100% {opacity:0} }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
-
     <div id="login-screen">
         <div class="login-box">
             <h3>[ SYSTEM LOCKED ]</h3>
@@ -34,7 +34,6 @@
             <button onclick="checkPass()" style="width: 100%;">AUTHORIZE</button>
         </div>
     </div>
-
     <div id="main-content">
         <h2>> EDWARD.EXE</h2>
         <div class="game-menu">
@@ -44,75 +43,81 @@
             <button onclick="openRadar()">RADAR CUACA</button>
             <button onclick="openTerminal()">TERMINAL</button>
             <button onclick="startScan()">SCAN SYSTEM</button>
-            <button onclick="trackGPS()" style="grid-column: span 2; background: rgba(0,255,0,0.1); border-color: yellow; color: yellow;">📍 LACAK LOKASI TARGET</button>
+            <button onclick="checkDevice()" style="grid-column: span 2;">CHECK DEVICE SENSOR</button>
+            <button onclick="trackGPS()" style="grid-column: span 2; border-color: yellow; color: yellow;">📍 LIVE GPS TRACKER</button>
             <button onclick="location.reload()" style="grid-column: span 2;">LOGOUT</button>
         </div>
     </div>
 
     <div id="gps-overlay" class="overlay">
         <h3>[ GPS INTERCEPTOR ]</h3>
-        <div id="gps-logs" style="font-size: 0.8em; text-align: left; height: 100px; overflow: hidden;"></div>
+        <div id="gps-logs" style="font-size: 0.8em; text-align: left;"></div>
         <div class="bar-container"><div id="gps-bar" class="bar-fill"></div></div>
-        <div id="gps-result" style="display:none; margin-top: 20px; text-align: left; border: 1px solid #00ff00; padding: 10px;">
-            <p>🛰️ STATUS: SIGNAL LOCKED</p>
-            <p>📍 LAT: <span id="lat">...</span></p>
-            <p>📍 LON: <span id="lon">...</span></p>
-            <button id="maps-btn" onclick="" style="width: 100%; color: yellow; border-color: yellow;">LIHAT DI GOOGLE MAPS</button>
+        <div id="gps-info" style="display:none; margin-top: 10px; font-size: 0.8em; text-align: left;">
+            <p>LAT: <span id="lat"></span> | LON: <span id="lon"></span></p>
         </div>
+        <div id="map"></div>
         <button class="exit-btn" onclick="closeOverlay('gps-overlay')">CLOSE</button>
     </div>
 
-    <div id="radar-overlay" class="overlay"><iframe id="radar-frame"></iframe><button class="exit-btn" onclick="closeOverlay('radar-overlay')">CLOSE</button></div>
+    <div id="device-overlay" class="overlay"><h3>[ DEVICE INFO ]</h3><div id="device-res" style="text-align: left; margin-top:20px;"></div><button class="exit-btn" onclick="closeOverlay('device-overlay')">CLOSE</button></div>
+    <div id="terminal-overlay" class="overlay" onclick="document.getElementById('hidden-input').focus()">
+        <div id="terminal-text">READY...</div><span id="cursor"></span>
+        <input type="text" id="hidden-input" style="position: absolute; opacity: 0;" oninput="handleTyping()">
+        <button class="exit-btn" onclick="closeOverlay('terminal-overlay')">EXIT</button>
+    </div>
+    <div id="radar-overlay" class="overlay"><iframe id="rf" style="width:100%; height:80%; border:none; filter:invert(1)"></iframe><button class="exit-btn" onclick="closeOverlay('radar-overlay')">CLOSE</button></div>
     <div id="scan-overlay" class="overlay"><h3>SCANNING...</h3><div class="bar-container"><div id="scan-bar" class="bar-fill"></div></div><button class="exit-btn" onclick="closeOverlay('scan-overlay')">FINISH</button></div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // MATRIX & LOGIN (Sama seperti sebelumnya)
         const canvas = document.getElementById('matrix'); const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const letters = "01"; const fontSize = 16; const columns = canvas.width / fontSize;
         const drops = Array(Math.floor(columns)).fill(1);
         function draw() { ctx.fillStyle = "rgba(0, 0, 0, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#0f0"; ctx.font = fontSize + "px arial"; drops.forEach((y, i) => { const text = letters.charAt(Math.floor(Math.random() * letters.length)); ctx.fillText(text, i * fontSize, y * fontSize); if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; }); }
         setInterval(draw, 33);
-        function checkPass() { if (document.getElementById("passkey").value.toUpperCase().trim() === "EDWARD-HECKER") { document.getElementById("login-screen").style.display = "none"; document.getElementById("main-content").style.display = "block"; } }
 
-        // GPS TRACKING LOGIC
+        function checkPass() { if (document.getElementById("passkey").value.toUpperCase().trim() === "EDWARD-HECKER") { document.getElementById("login-screen").style.display = "none"; document.getElementById("main-content").style.display = "block"; } }
+        function closeOverlay(id) { document.getElementById(id).style.display = "none"; }
+
         function trackGPS() {
-            const overlay = document.getElementById("gps-overlay");
+            document.getElementById("gps-overlay").style.display = "block";
             const logs = document.getElementById("gps-logs");
             const bar = document.getElementById("gps-bar");
-            overlay.style.display = "block";
-            logs.innerHTML = "> Meminta akses satelit...<br>";
-            
+            logs.innerHTML = "> Inisialisasi satelit...<br>";
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
+                navigator.geolocation.getCurrentPosition((p) => {
                     let w = 0;
                     const intv = setInterval(() => {
                         w += 5; bar.style.width = w + "%";
-                        if(w === 40) logs.innerHTML += "> Mengenkripsi sinyal GPS...<br>";
-                        if(w === 80) logs.innerHTML += "> Menentukan titik koordinat...<br>";
                         if (w >= 100) {
                             clearInterval(intv);
-                            document.getElementById("gps-result").style.display = "block";
-                            const lat = position.coords.latitude;
-                            const lon = position.coords.longitude;
-                            document.getElementById("lat").innerHTML = lat;
-                            document.getElementById("lon").innerHTML = lon;
-                            document.getElementById("maps-btn").onclick = () => {
-                                window.open(`https://www.google.com/maps?q=${lat},${lon}`, '_blank');
-                            };
+                            logs.innerHTML += "> LOKASI TERKUNCI!<br>";
+                            document.getElementById("gps-info").style.display = "block";
+                            document.getElementById("lat").innerText = p.coords.latitude;
+                            document.getElementById("lon").innerText = p.coords.longitude;
+                            document.getElementById("map").style.display = "block";
+                            var map = L.map('map').setView([p.coords.latitude, p.coords.longitude], 15);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+                            L.marker([p.coords.latitude, p.coords.longitude]).addTo(map).bindPopup('TARGET DISINI').openPopup();
                         }
                     }, 50);
-                }, () => {
-                    logs.innerHTML += "<span style='color:red'>> ERROR: AKSES DITOLAK TARGET!</span>";
                 });
-            } else {
-                alert("Browser tidak mendukung GPS.");
             }
         }
 
-        function openRadar() { document.getElementById("radar-frame").src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1"; document.getElementById("radar-overlay").style.display = "block"; }
-        function closeOverlay(id) { document.getElementById(id).style.display = "none"; }
-        function startScan() { document.getElementById("scan-overlay").style.display = "block"; let w = 0; const bar = document.getElementById("scan-bar"); const intv = setInterval(() => { if (w >= 100) clearInterval(intv); else { w++; bar.style.width = w + "%"; } }, 30); }
+        function checkDevice() {
+            document.getElementById("device-overlay").style.display = "block";
+            const res = document.getElementById("device-res");
+            res.innerHTML = "📱 OS: " + navigator.platform + "<br>";
+            if(navigator.getBattery) navigator.getBattery().then(b => res.innerHTML += "🔋 BATERAI: " + Math.round(b.level * 100) + "%");
+        }
+
+        function openTerminal() { document.getElementById("terminal-overlay").style.display = "block"; }
+        function handleTyping() { document.getElementById("terminal-text").innerHTML += "> BYPASSING... <br>"; }
+        function openRadar() { document.getElementById("rf").src = "https://www.rainviewer.com/map.html?loc=-2.5,118,5&control=1&map=1&type=1&style=1&hp=1&sm=1&sn=1"; document.getElementById("radar-overlay").style.display = "block"; }
+        function startScan() { document.getElementById("scan-overlay").style.display = "block"; let w = 0; const b = document.getElementById("scan-bar"); const i = setInterval(() => { w++; b.style.width = w + "%"; if(w>=100) clearInterval(i); }, 20); }
     </script>
 </body>
 </html>
